@@ -1,0 +1,323 @@
+************************SANAL MAKÝNE KURULUM*************ALT_GR-CTRL*******************linux-mouse-ortatuþ//****************************
+2048
+30GB
+Processor 2, 
+video memory 128MB, VBoxsvga
+************************LÝNUX KURULUM*********************************oracle123/PRODDB*****************************************
+START
+3.59GB linux iso seç
+install
+Skip
+Enter(ORACLE LÝNUX 6)
+English
+Turkish(KEYBOARD)
+Enter(Basic Storage)
+Yes discard any data
+orcl (localhost)(enter deyip geçer ama sonradan kesin oluþtururuz)
+Enter
+Ýstanbul,Europe
+oracle(password 2side)
+use anyway
+Create Custom Layout /Use All Space(Otomatik seçer**)
+----30GB hardiski partlara ayýr----
+/boot 500MB ext4
+/swap 4096MB
+/     File to maximum allowable size ext4
+format
+write change to disk
+Next (sda aynen kalýr)
+customize now
+Next
+----PACKAGES ayarlama-------1338---30DAKÝKA SÜRÜYOR. //Ram 2048 ise 9dk..
+--BASE----
+1-compitiliy librrares
+2-security tools
+3-ISCSI
+--server---------
+1-system administer tool
+--system management----
+1-system management seç
+--Desktop---------
+1-kde Desktop
+2-legacy X Windows
+3-remote desktop client hariç hepsi
+--Aplications------
+1-internet browser
+--development----
+1-additional development
+2-developmen tools
+REBOOT
+
+-------------LÝNUX WELCOME--------------
+Forward
+Forward
+No, I prefer 
+Forward
+No thanks. 
+Forward
+Forward(Create User)
+Forward (Date and time)
+Tiki kaldýr(Enable Kdump)
+Finish
+yes
+ok
+-----kk: #rpm -qa | grep yum
+***********************ORACLE PREiNSTALLER***********************************************************************************
+=========>>>ROOT "#" olarak yapýlacak
+Other
+root(username)
+oracle(password)
+close(açýlan pencereye)
+interneti aç.(sað üst ÇÝFT BÝLGÝSAYAR)
+Browserdan kontrol et.
+
+-------Yum Ýnstall-------------
+#yum search oracle-rdbms (çýkmazsa "#ps -ef | grep 13023" yaz tekrar yum search yap)
+#yum install oracle-rdbms-server-11gR2-preinstall.x86_64 -y
+enter
+Total 795K
+y(yes)
+y(yes)
+---#id oracle
+---Yaratýlan kullanýcý ve gruplarý görürüz.
+---#cat /etc/group bütün gruplarý görürüz
+
+-------------Oracle USER oluþturma-----------
+passwd oracle
+oracle
+oracle (confirm)
+updated successfully yazar.
+
+-------SELÝNUX VE FÝREWALL AYARLARI-------(3)
+#vi /etc/selinux/config
+Enter
+6 J
+16 L
+A
+<--- tuþu kullan ve sil.
+
+SELÝNUX=disabled   ("disabled" yaz.)--->1
+Esc
+:wq!
+
+#service iptables stop        --------->2
+Enter
+
+#chkconfig iptables off       --------->3
+Enter
+--#shutdown -h now 
+
+-----------DÝSK EKLEME----------------------partionation--bölme, mount--ekleme
+---100GB DÝSK OLUÞTUR
+Virtual Machine-->Settings-->Storage-->Controller Sata-->Add harddisk(alttan) 
+Create New Disk-->Next-->Next-->100GB-->Create. (oracle kurulumu için 100GB disk oluþturduk.)
+---#ls -l /dev/sd*   (diskleri sýralý gör)
+virtual machine üzerinden SHOW ile linux tekrar aç. 
+#fdisk -l (disklerin hepsini gör ayrýntýlý)
+#fdisk /dev/sdb
+m-->Enter-->n-->Enter-->p-->Enter-->1-->Enter-->Enter-->Enter(bütün diski aldý.) 
+m-->Enter-->w-->Enter  (Disk oluþtu.) (m-yardým, n-new, p-primary/ilk kez, w-write)
+---sdb-->sdb1 oldu. GÖRMEK ÝÇÝN:Applications-->System Tools-->Disk Utility-->Ata VBox Hardisk..(VBOX yazar)
+-------Diski görmezse-----------------------------
+--Quit(sað üst/root'un  altýnda)
+--Log out (Sonra oracle userý görürüz)
+--"RESTART"  (mouse sað alt kapat tuþundan-->Shut down üstünde) 
+---Ýþletim sistemi diski görür..
+#mkfs.ext4 /dev/sdb1   (formatýný ext4 yaptýk. TYPE=EXT4)GÖRMEK ÝÇÝN:Applications-->System Tools-->Disk Utility-->Ata VBox Hardisk..(VBOX yazar)
+#mkdir /u01
+----#mkdir /stage
+#mount /dev/sdb1 /u01 (mount eder. Yani ekleriz.)GÖRMEK ÝÇÝN:Disk Utility
+#vi /etc/fstab
+14-J ---> o
+/dev/sdb1      /u01      ext4    defaults    0 0 
+ESC  
+:wq!
+#df -h (diskleri gör)
+
+---------PATH OLUÞTURMA-----------(Kurulumun olduðu yer)
+#mkdir -p /u01/app/oracle/product/11.2.0/db (myDBname misal)
+#mkdir -p /u01/orainstall       zip dosyalarý buraya at...
+#chown -R oracle:oinstall /u01  oinstall grubundaki oracle kullanýcýsýna u01 yetkisini ver.
+#chmod -R 775 /u01
+
+------------HOSTS------------------
+#Ýfconfig   (inet addr:"10.0.2.15" al) 
+#hostname   (ÖR:"orcl.localdomain") 
+#vi /etc/hosts      
+1 aþaðý-->o
+10.0.2.15 orcl.localdomain orcl ("ÝP" ve "localhost" sade deðiþir..3 ekleme)(olmadýðýnda prvf-002 hatasý)
+ESC-->:wq!  (kaydet ve çýk)
+
+-------DATABASE KURULUM ZÝPLERÝNÝ gönder---------"#ROOT"----
+--DÝKKAT:Sanal bilgisayar "ROOT" olcak.
+
+VM-->Settings-->Network-->BRÝDGED ADAPTER-->allow all(deny yerine)-->OK.
+ÖNEMLÝ system eth0 (sað üst iki bilgisayar) Ýnterneti KONTROL ET.
+
+windows: pscp C:\Users\muratcelik\Desktop\ORACLE\p13390677_112040_Linux-x86-64_1of7.zip root@192.168.44.136:/u01/orainstall
+         pscp C:\Users\muratcelik\Desktop\ORACLE\sonzip\bash.txt root@192.168.44.136:/u01/orainstall  (DOSYA UZANTISI TXT ÖNEMLÝ)
+
+#scp p13390677_112040_Linux-x86-64_1of7.zip root@192.168.2.125:/u01/orainstall  (windows içinse: "#pscp" yazarýz )
+NAT yap. Oracle Userrrrrr geç.
+
+---ÖNEMLÝ NOT:PSCP "A command is not recognized as an internal or external command" Hatasý verirse C:\Windows\System32 içine pscp.exe atman gerek. 
+     ((	https://www.chiark.greenend.org.uk/~sgtatham/putty/latest.html  ))adresinden pscp.exe 64bit seç.
+---NOT:sanal pc-->>ana pc ye #scp -r p13390677_112040_Linux-x86-64_1of7.zip root@10.0.2.15:/u01/orainstall
+---winscp ile göndermek için:
+---"ÝP, root;oracle" giriþ yap-->dosyayý istediðin klasöre gönder.
+
+=================>>>>>ORACLE USER "$" olarak yap<<<<<<<<<<<<==============================================
+--#shutdown -h now 
+#unzip p13390677_112040_Linux-x86-64_1of7.zip
+#unzip p13390677_112040_Linux-x86-64_2of7.zip
+zipleri açtýk ve orainstall içinde "database" klasörü oluþtu.
+
+----#df -h (disklere tekrar bakarýz) linux-sda3-5.1GB ,oracle->6.2gb sdb1
+----#df -k (daha ayrýntýlýsý)ÖR: 5200800MB
+
+----->>>>>>>>>>>BASH PROFÝLE<<<<<<<<<<<-----------(4 yer deðiþir. ol6-112-->localhost; UNQNAME, HOME-->DB11G; BASE-->/db)
+VM Machine-->settings-->network-->NAT (interneti açarýz)
+$cd  (bash profile boþ görünecek cd yaz.)
+$vi .bash_profile
+12 J-->o-->Enter
+
+------------------------------------------------------orcl.localdomain--home /db--
+# Oracle Settings
+TMP=/tmp; export TMP
+TMPDIR=$TMP; export TMPDIR
+
+ORACLE_HOSTNAME=orcl.localdomain; export ORACLE_HOSTNAME
+ORACLE_UNQNAME=DB11G; export ORACLE_UNQNAME
+ORACLE_BASE=/u01/app/oracle; export ORACLE_BASE
+ORACLE_HOME=$ORACLE_BASE/product/11.2.0/db; export ORACLE_HOME
+ORACLE_SID=DB11G; export ORACLE_SID
+
+PATH=/usr/sbin:$PATH; export PATH
+PATH=$ORACLE_HOME/bin:$PATH; export PATH
+
+LD_LIBRARY_PATH=$ORACLE_HOME/lib:/lib:/usr/lib; export LD_LIBRARY_PATH
+CLASSPATH=$ORACLE_HOME/jlib:$ORACLE_HOME/rdbms/jlib; export CLASSPATH
+-------------------------------------------------------------------
+
+ESC  
+:wq!
+$. .bash_profile  (diyerek kaydederiz.DÝKKATT!!! unutma..)(source .bash_profile de olur)
+
+---Not:SID ve UNQNAME=DB11G database global adý.dbca kurulumunda.ÖNEMLÝ
+*************************************DATABASE KURULUM*******************************************************************
+--Quit(sað üst/root'un  altýnda)
+--Log out (Sonra oracle userý görürüz)
+--"RESTART"  (mouse sað alt kapat tuþundan-->Shut down üstünde) 
+ORACLE KULLANICISI ÝLE ÝÞLETÝM SÝSTEMÝNÝ AÇ.
+$cd /u01/orainstall/database) YOLU ÝLE GÝR.
+$ls (içinde "runInstaller" ok)
+$ ./runInstaller
+enter
+------------------------------ORACLE KURULUM ARAYÜZÜ--------------12DAKÝKA---------------------
+I wish (tiki kaldýr)
+Next
+Yes (email olmazsa hata olur yazacak)
+Next
+Skip software updates
+Next
+Ýnstall Database Software only
+Next
+Single Ýnstance database Ýnstallion
+Next
+English
+Next
+Enterprise Edition 4.7GB 
+Next
+oracle base:/u01/app/oracle                             (bash profile yazdýðýmýzdan gelir)
+oracle location:/u01/app/oracle/product/11.2.0/myDBname (bash profile yazdýðýmýzdan gelir)
+Next
+Next (oraýnventory kýsmý DEFAULT kalýr)
+"dba" seç.(Database Operator(OSOPER))
+Next (kuruyorrrrrrrrrrr...)
+Ýnstall
+----------------------------sh dosyalarýný terminale yaz(2 tane)-------------------------------------
+root (önce ROOT a geç)
+su - root
+# /u01/app/oraInventory/orainstRoot.sh
+Enter
+# /u01/app/oracle/product/11.2.0/myDBname/root.sh
+Enter
+OK (sonra da sh dosyalarýnýn olduðu arayüz altýnda)
+Close (Finish gördük.) (üstte baþarýlý bir þekilde kuruldu yazar)
+
+------------------NETCA-------------------(net configuration assistant)//ps -ef | grep pmon
+$cd
+$ netca
+listener Configuration
+Next
+Add
+Next
+LÝSTENER
+Next
+TCP
+Next
+1521 (port HATASI ÇÖZÜMÜ: "$ifconfig"  bak fazla veya deðiþen ÝP var mý, sonra "$cat /etc/hosts" ÝP sabit mi bak.) 
+      ÝNTERNET AÇIK OLMALI(eth0)sað üst. Not:tekrar hata alýrsan netcayý sil yeniden kur.
+Next
+Next ("No" yazacak)
+Next
+Finish
+------------------------------- DBCA---------------(database configuration assistant)
+$dbca
+Next (welcome-hoþgeldin ekraný)
+create a Database
+Next
+General Purpose a Transaction Processing
+Next
+cd
+cat .bash_profile
+ORACLE_SID=DB11G  (DB11G veya yerine yazýlan)Dikkat:ORACLE_UNQNAME,ORACLE SID ayný olmalý
+DB11G (Global Database Name)
+DB11G (SID)
+Next
+Next 
+Use the Same Administrative Password for All Accounts
+password:oracle
+confirm password:oracle
+Next
+yes
+Use Database File Locations from Template
+Next
+Specify fast Recovery Area
+Next
+Sample Schemas
+Next
+Sizing-->Process-->300
+Character Sets-->USE UNÝCODE AL32UTF8
+Next
+Next(Database Storage)
+Finish
+Save as an HTML file (çýkan sayfada)
+save 
+OK
+Kuruluyorrrrrrrrrr............26 dakika.
+The Database Control URL is https://localhost.localdomain:1158/em
+shift+insert(kopyala)
+Exit
+firefox browser
+mouse orta tuþu (yapýþtýr)
+This Connection is Untrusted (baðlanma hatasý verir)
+I understand the Risks
+Add Exception
+confirm Security Exception
+User Name:SYS
+Password:oracle
+Connect As: SYSDBA
+böylelikle ENTERPRÝSE MANAGER açýlýr.
+
+--------------------VERÝTABANINI AÇMA------------
+$ps -ef|grep pmon (veritabanýnýn çalýþýp çalýþmadýðýný anlatýr)ör:ora_pmon_DB11G
+
+Local Connect: sqlplus / as sysdba
+SQL>select status from v$instance;
+
+"alt gr" ve "-" ==> |
+"alt gr" ve "prt sc" ==>ekran foto
+
+
+
